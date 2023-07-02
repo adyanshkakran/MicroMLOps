@@ -1,0 +1,13 @@
+action: training/inference
+data: location/to/file
+data-preprocessing:
+  - steps
+  - you want 
+  - to perform
+feature-extraction:
+  - steps
+  - you want 
+  - to perform
+training-parameters:
+  learning-rate: value
+  cross-validation-frequency: value
