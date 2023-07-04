@@ -1,0 +1,14 @@
+action: training
+data: ../archive/
+data-preprocessing:
+  - tokenization
+  - toLowerCase
+  - removeAlphaNumberics
+  - removeStopWords
+  - Lemmatization
+feature-extraction:
+  - TF-IDF
+training-parameters:
+  useGridSearch: true
+  # learning-rate: value
+  # cross-validation-frequency: value
