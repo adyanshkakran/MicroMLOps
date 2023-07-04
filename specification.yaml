@@ -1,13 +1,27 @@
 action: training/inference
-data: location/to/file
+data: location/to/file # This will be taken from data warehouse
 data-preprocessing:
-  - steps
-  - you want 
-  - to perform
+  tokenization: true
+  to-lowercase: true
+  remove-alphanumerics: true
+  remove-stopwords: true
+  lemmatization: true
+  remove-punctuation: true
+  stemming: true
+  remove-specific: ['%', '('] # specific characters user might want to remove
 feature-extraction:
-  - steps
-  - you want 
-  - to perform
+  TF-IDF: true
+  one-hot-encoding: true
+  bag-of-words: true
+  n-grams: true
+  Word-2-Vec: true
 training-parameters:
   learning-rate: value
+  batch-size: value
+  epochs: value
+  n-estimators: value
+  max-depth: value
   cross-validation-frequency: value
+
+# more options can be added as per requirement and these options are not compulsory to give in the YAML file,
+# if they are there, our backend will process them otherwise the task will not occur.
