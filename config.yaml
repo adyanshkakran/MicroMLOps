@@ -1,0 +1,15 @@
+action: training
+data: archive/
+model: svm
+data-preprocessing:
+  tokenization: true
+  to-lowercase: true
+  remove-alphanumerics: true
+  remove-stopwords: true
+  lemmatization: true
+feature-extraction:
+  TF-IDF: true
+training:
+  n-estimators: 100
+  max-depth: None
+  use-grid-search: true

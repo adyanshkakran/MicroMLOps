@@ -1,27 +1,32 @@
 action: training/inference
 data: location/to/file # This will be taken from data warehouse
+model: svm/random-forest/etc
 data-preprocessing:
-  tokenization: true
-  to-lowercase: true
-  remove-alphanumerics: true
-  remove-stopwords: true
-  lemmatization: true
-  remove-punctuation: true
-  stemming: true
-  remove-specific: ['%', '('] # specific characters user might want to remove
+  tokenization: [0, 1, 2] # column numbers
+  to-lowercase: [0, 1, 2] # column numbers
+  remove-alphanumerics: [0, 1, 2] # column numbers
+  remove-stopwords: [0, 1, 2] # column numbers
+  lemmatization: [0, 1, 2] # column numbers
+  remove-punctuation: [0, 1, 2] # column numbers
+  stemming: [0, 1, 2] # column numbers
+  remove-specific:
+    regex: some-regex
+    columns: [0, 1, 2] # column numbers
 feature-extraction:
-  TF-IDF: true
-  one-hot-encoding: true
-  bag-of-words: true
-  n-grams: true
-  Word-2-Vec: true
-training-parameters:
-  learning-rate: value
-  batch-size: value
-  epochs: value
-  n-estimators: value
-  max-depth: value
-  cross-validation-frequency: value
+  TF-IDF: [0, 1, 2] # column numbers
+  one-hot-encoding: [0, 1, 2] # column numbers
+  bag-of-words: [0, 1, 2] # column numbers
+  n-grams: [0, 1, 2] # column numbers
+  Word-2-Vec: [0, 1, 2] # column numbers
+training:
+  learning-rate: 0.1
+  batch-size: 300
+  epochs: 5
+  n-estimators: 100
+  max-depth: 20
+  cross-validation-frequency: 5
+  use-grid-search: true
+  train-test-val-split: 60/20/20
 
 # more options can be added as per requirement and these options are not compulsory to give in the YAML file,
 # if they are there, our backend will process them otherwise the task will not occur.
