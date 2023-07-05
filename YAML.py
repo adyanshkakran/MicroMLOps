@@ -2,7 +2,7 @@ import yaml
 from kafka import KafkaProducer
 import json
 
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'),bootstrap_servers=['localhost:9092'])
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=['localhost:9092'])
 
 def checkSteps(steps, standard, step):
     for key in steps:
@@ -15,20 +15,20 @@ def checkYaml():
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
             if data['action'] == 'training':
-                checkSteps(data['data-preprocessing'], standard['data-preprocessing'], 'data-preprocessing')
-                checkSteps(data['feature-extraction'], standard['feature-extraction'], 'feature-extraction')
+                checkSteps(data['data_preprocessing'], standard['data_preprocessing'], 'data_preprocessing')
+                checkSteps(data['feature_extraction'], standard['feature_extraction'], 'feature_extraction')
                 checkSteps(data['training'], standard['training'], 'training')
-                if data['data-preprocessing'] is not None:     
-                    producer.send('data-preprocessing', data)
+                if data['data_preprocessing'] is not None:     
+                    producer.send('data_preprocessing', data)
                     return
-                if data['feature-extraction'] is not None:
-                    producer.send('feature-extraction', data)
+                if data['feature_extraction'] is not None:
+                    producer.send('feature_extraction', data)
                     return
                 if data['training'] is not None:
                     producer.send('training', data)
                     return
             elif data['action'] == 'inference':
-                for i in ['data-preprocessing', 'feature-extraction', 'training']:
+                for i in ['data_preprocessing', 'feature_extraction', 'training']:
                     if data[i] is not None:
                         raise Exception('Invalid ' + i + ' step')
             else:
