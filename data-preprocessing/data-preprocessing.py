@@ -95,13 +95,13 @@ def process_message(message):
     Return output message
     """
     obj = json.loads(message.value)
-
     data = pd.read_csv(obj["data"])
+    path = obj["data"]
 
-    execute(data, obj["data_preprocessing"])
+    execute(data, obj["data_preprocessing"], path)
     return obj
 
-def execute(data: pd.DataFrame, config: dict):
+def execute(data: pd.DataFrame, config: dict, path: str):
     print("\n\n\n")
     for key in config.keys():
         if key == "remove_specific":
@@ -116,7 +116,10 @@ def execute(data: pd.DataFrame, config: dict):
             except Exception as e:
                 print(f"Function {key} not found")
 
-    print(data.head())
+    data.to_csv(path[:-4] + "-d.csv", index=False) # saves in file originalFileName-d.csv
+
+    if os.environ.get("MICROML_DEBUG"):
+        print(data.head())
 
 def send_message(output_message, producer: KafkaProducer):
     """
