@@ -2,11 +2,15 @@ action: training
 data: ../archive/test.csv
 model: svm
 data_preprocessing:
-  tokenization: [0]
   to_lowercase: [0]
   remove_nonalphanumerics: [0]
   remove_stopwords: [0]
-  lemmatization: [0]
+  # lemmatization: [0]
+  stemming: [0]
+  # remove_specific:
+  #   regex: "[a-z]"
+  #   columns: [0] # column numbers
+  tokenization: [0]
 feature_extraction:
   TF_IDF: true
 training:
