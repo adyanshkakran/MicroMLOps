@@ -12,6 +12,6 @@ def stemming(data: pd.DataFrame, columns: list):
     """
     try:
         for column in columns:
-            data[data.columns[column]] = data[data.columns[column]].apply(lambda x: [stemmer.stem(word) for word in x])
+            data[data.columns[column]] = data[data.columns[column]].apply(lambda x: " ".join([stemmer.stem(word) for word in x.split()]))
     except Exception as e:
         print(e)
