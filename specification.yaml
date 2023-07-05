@@ -1,32 +1,32 @@
 action: training/inference
 data: location/to/file # This will be taken from data warehouse
-model: svm/random-forest/etc
-data-preprocessing:
+model: svm/random_forest/etc
+data_preprocessing:
   tokenization: [0, 1, 2] # column numbers
-  to-lowercase: [0, 1, 2] # column numbers
-  remove-alphanumerics: [0, 1, 2] # column numbers
-  remove-stopwords: [0, 1, 2] # column numbers
+  to_lowercase: [0, 1, 2] # column numbers
+  remove_nonalphanumerics: [0, 1, 2] # column numbers
+  remove_stopwords: [0, 1, 2] # column numbers
   lemmatization: [0, 1, 2] # column numbers
-  remove-punctuation: [0, 1, 2] # column numbers
+  remove_punctuation: [0, 1, 2] # column numbers
   stemming: [0, 1, 2] # column numbers
-  remove-specific:
-    regex: some-regex
+  remove_specific:
+    regex: some_regex
     columns: [0, 1, 2] # column numbers
-feature-extraction:
-  TF-IDF: [0, 1, 2] # column numbers
-  one-hot-encoding: [0, 1, 2] # column numbers
-  bag-of-words: [0, 1, 2] # column numbers
-  n-grams: [0, 1, 2] # column numbers
-  Word-2-Vec: [0, 1, 2] # column numbers
+feature_extraction:
+  TF_IDF: [0, 1, 2] # column numbers
+  one_hot_encoding: [0, 1, 2] # column numbers
+  bag_of_words: [0, 1, 2] # column numbers
+  n_grams: [0, 1, 2] # column numbers
+  Word_2_Vec: [0, 1, 2] # column numbers
 training:
-  learning-rate: 0.1
-  batch-size: 300
+  learning_rate: 0.1
+  batch_size: 300
   epochs: 5
-  n-estimators: 100
-  max-depth: 20
-  cross-validation-frequency: 5
-  use-grid-search: true
-  train-test-val-split: 60/20/20
+  n_estimators: 100
+  max_depth: 20
+  cross_validation_frequency: 5
+  use_grid_search: true
+  train_test_val_split: 60/20/20
 
 # more options can be added as per requirement and these options are not compulsory to give in the YAML file,
 # if they are there, our backend will process them otherwise the task will not occur.
