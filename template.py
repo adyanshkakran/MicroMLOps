@@ -6,10 +6,11 @@ produces message on output topic
 """
 
 import os
+import json
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True) # env file has higher preference
 
 """
 configuring kafka
@@ -53,7 +54,7 @@ def setup_kafka_producer():
         "bootstrap_servers": kafka_broker
     }
     try:
-        producer = KafkaProducer(**config)
+        producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
         raise Exception("Failed to create Kafka Producer")
@@ -80,6 +81,8 @@ def process_message(message):
     Return output message
     """
     print("received message: ", message)
+    message_obj = json.loads(message.value)
+    print("parsed json obj: ", message_obj)
     print("do computation here")
     return "output_message"
 
