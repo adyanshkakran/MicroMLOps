@@ -80,18 +80,20 @@ def process_message(message):
     Do necessary computation
     Return output message
     """
-    print("received message: ", message)
     message_obj = json.loads(message.value)
-    print("parsed json obj: ", message_obj)
-    print("do computation here")
-    return "output_message"
+    if os.environ.get("MICROML_DEBUG", "0"):
+        print("received message: ", message)
+        print("parsed json obj: ", message_obj)
+    # Do some computation
+    return message_obj
 
 def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    print(f"format {output_message} for sending")
-    producer.send(output_topic, b"output message here")
+    if os.environ.get("MICROML_DEBUG", "0"):
+        print(f"format {output_message} for sending")
+    producer.send(output_topic, output_message)
 
     
 #######
