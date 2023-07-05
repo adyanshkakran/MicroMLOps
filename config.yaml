@@ -1,12 +1,12 @@
 action: training
-data: archive/
+data: ../archive/test.csv
 model: svm
 data_preprocessing:
-  tokenization: true
-  to_lowercase: true
-  remove_nonalphanumerics: true
-  remove_stopwords: true
-  lemmatization: true
+  tokenization: [0]
+  to_lowercase: [0]
+  remove_nonalphanumerics: [0]
+  remove_stopwords: [0]
+  lemmatization: [0]
 feature_extraction:
   TF_IDF: true
 training:

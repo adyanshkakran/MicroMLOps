@@ -7,7 +7,6 @@ data_preprocessing:
   remove_nonalphanumerics: [0, 1, 2] # column numbers
   remove_stopwords: [0, 1, 2] # column numbers
   lemmatization: [0, 1, 2] # column numbers
-  remove_punctuation: [0, 1, 2] # column numbers
   stemming: [0, 1, 2] # column numbers
   remove_specific:
     regex: some_regex
