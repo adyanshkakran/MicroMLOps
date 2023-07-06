@@ -5,10 +5,14 @@ performs operations and then
 produces message on output topic
 """
 
-import os
 import json
+import os
+import numpy as np
+import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
+
+from infer import infer
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -81,16 +85,24 @@ def process_message(message):
     Return output message
     """
     message_obj = json.loads(message.value)
-    if os.environ.get("MICROML_DEBUG", "0"):
-        print("parsed json obj: ", message_obj)
+    # if os.environ.get("MICROML_DEBUG", "0"):
+    #     print("parsed json obj: ", message_obj)
     
     job_uuid = message_obj["uuid"]
-    
-    model_file_path = os.environ.get("MODEL_WAREHOUSE") + job_uuid + ".model"
-    info_file_path = os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info"
+    data = pd.read_csv(message_obj["data"])
 
+    try:
+        model_file_path = os.environ.get("MODEL_WAREHOUSE") + job_uuid + ".model"
+        info_file_path = os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info"
 
-    return message_obj
+        if os.environ.get("MICROML_DEBUG", "0"):
+            print(model_file_path, info_file_path)
+    except Exception as e:
+        raise Exception("Could not find model or info") from e
+
+    results = infer(data, model_file_path)
+
+    return results
 
 def send_message(output_message, producer: KafkaProducer):
     """
