@@ -88,6 +88,7 @@ def process_message(message):
     message_obj = json.loads(message.value)
     data = pd.read_csv(message_obj["data"])
     path = message_obj["data"]
+    global output_topic
 
     output_topic = message_obj["action"] == "training" and os.environ.get("TRAINING_OUTPUT_TOPIC", "default_training_output_topic") or os.environ.get("INFERENCE_OUTPUT_TOPIC", "default_inference_output_topic")
 
@@ -125,7 +126,7 @@ def execute(data: pd.DataFrame, config: dict, path: str):
     data.to_csv(path[:-4]+ "f.csv", index=False)
     
     if os.environ.get("MICROML_DEBUG", "0"):
-        print("data after feature extraction: ", data.head())
+        print(data.head())
 
 def send_message(output_message, producer: KafkaProducer):
     """
