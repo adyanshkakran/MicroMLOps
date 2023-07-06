@@ -41,7 +41,7 @@ def setup_kafka_consumer():
         consumer = KafkaConsumer(input_topic, **config)
         return consumer
     except Exception as e:
-        raise Exception("Failed to create Kafka Consumer")
+        raise Exception("Failed to create Kafka Consumer") from e
 
 
 def setup_kafka_producer():
@@ -57,7 +57,7 @@ def setup_kafka_producer():
         producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
-        raise Exception("Failed to create Kafka Producer")
+        raise Exception("Failed to create Kafka Producer") from e
 
 
 #######
@@ -95,7 +95,7 @@ def send_message(output_message, producer: KafkaProducer):
         print(f"format {output_message} for sending")
     producer.send(output_topic, output_message)
 
-    
+
 #######
 def main():
     consumer = setup_kafka_consumer()

@@ -14,8 +14,8 @@ data_preprocessing:
 feature_extraction:
   TF_IDF: true
 training:
-  features: [0, 1, 2]
-  label: [3]
+  features: [0]
+  label: [1]
   n_estimators: 100
   max_depth: None
   use_grid_search: true
