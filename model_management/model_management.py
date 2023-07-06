@@ -19,12 +19,13 @@ default input topic is filename (without .py)
 output topic must be specified
 """
 input_topic:str = os.environ.get("INPUT_TOPIC", os.path.basename(__file__)[:-3])
-output_topic:str = os.environ.get("OUTPUT_TOPIC", "default_output_topic")
+output_topic_inference:str = os.environ.get("OUTPUT_TOPIC_INFERENCE", "default_output_topic")
+output_topic_training:str = os.environ.get("OUTPUT_TOPIC_TRAINING", "default_output_topic")
 kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
 consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
 
 if os.environ.get("MICROML_DEBUG", "0"):
-    print(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
+    print(f"Input Topic: {input_topic}; Output Topic(T/I): {output_topic_training}/{output_topic_inference}")
     print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
 def setup_kafka_consumer():
@@ -41,7 +42,7 @@ def setup_kafka_consumer():
         consumer = KafkaConsumer(input_topic, **config)
         return consumer
     except Exception as e:
-        raise Exception("Failed to create Kafka Consumer") from e
+        raise Exception("Failed to create Kafka Consumer")
 
 
 def setup_kafka_producer():
@@ -57,7 +58,7 @@ def setup_kafka_producer():
         producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
-        raise Exception("Failed to create Kafka Producer") from e
+        raise Exception("Failed to create Kafka Producer")
 
 
 #######
@@ -69,8 +70,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
     """
     try:
         for message in consumer:
-            output_message = process_message(message)
-            send_message(output_message, producer)
+            output_message, output_topic = process_message(message)
+            send_message(output_message, output_topic, producer)
     except KeyboardInterrupt:
         print("Exiting...")
 
@@ -82,20 +83,23 @@ def process_message(message):
     """
     message_obj = json.loads(message.value)
     if os.environ.get("MICROML_DEBUG", "0"):
-        print("received message: ", message)
         print("parsed json obj: ", message_obj)
-    # Do some computation
-    return message_obj
+    
+    if message_obj["action"] == "training":
+        return message_obj, output_topic_training
+    elif message_obj["action"] == "inference":
+        return message_obj, output_topic_inference
 
-def send_message(output_message, producer: KafkaProducer):
+def send_message(output_message, output_topic, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
         print(f"format {output_message} for sending")
+
     producer.send(output_topic, output_message)
 
-
+    
 #######
 def main():
     consumer = setup_kafka_consumer()

@@ -99,6 +99,7 @@ def process_message(message):
     path = obj["data"]
 
     execute(data, obj["data_preprocessing"], path)
+    obj["data"] = path[:-4] + "-d.csv"
     return obj
 
 def execute(data: pd.DataFrame, config: dict, path: str):

@@ -7,8 +7,14 @@ produces message on output topic
 
 import os
 import json
+import numpy as np
+import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
+from pprint import pprint
+
+from svm import svm
+from random_forest import random_forest
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -41,7 +47,7 @@ def setup_kafka_consumer():
         consumer = KafkaConsumer(input_topic, **config)
         return consumer
     except Exception as e:
-        raise Exception("Failed to create Kafka Consumer") from e
+        raise Exception("Failed to create Kafka Consumer")
 
 
 def setup_kafka_producer():
@@ -57,7 +63,7 @@ def setup_kafka_producer():
         producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
-        raise Exception("Failed to create Kafka Producer") from e
+        raise Exception("Failed to create Kafka Producer")
 
 
 #######
@@ -82,20 +88,35 @@ def process_message(message):
     """
     message_obj = json.loads(message.value)
     if os.environ.get("MICROML_DEBUG", "0"):
-        print("received message: ", message)
-        print("parsed json obj: ", message_obj)
-    # Do some computation
+        pprint(message_obj)
+    
+    model_config = message_obj["model"]
+    training_config = message_obj["training"]
+    data = pd.read_csv(message_obj["data"])
+    job_uuid = message_obj["uuid"]
+
+    if not model_config or not training_config:
+        raise Exception("Model or training config not specified")
+    
+    execute(data, model_config, message_obj, job_uuid)
+    
     return message_obj
+
+def execute(data: pd.DataFrame, model_config: str, config: dict, job_uuid: str):
+    try:
+        globals()[model_config](data, config, job_uuid)
+    except Exception as e:
+        print(e)
 
 def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+        print("format output message for sending")
     producer.send(output_topic, output_message)
 
-
+    
 #######
 def main():
     consumer = setup_kafka_consumer()

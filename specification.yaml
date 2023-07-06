@@ -1,5 +1,5 @@
 action: training/inference
-data: location/to/file # This will be taken from data warehouse
+data: ../archive/test.csv # This will be taken from data warehouse
 model: svm/random_forest/etc
 data_preprocessing:
   tokenization: [0, 1, 2] # column numbers
@@ -20,6 +20,8 @@ feature_extraction:
   n_grams: [0, 1, 2] # column numbers
   word_2_vec: [0, 1, 2] # column numbers
 training:
+  features: [0, 1, 2] # column numbers
+  label: [3] # column numbers
   learning_rate: 0.1
   batch_size: 300
   epochs: 5
