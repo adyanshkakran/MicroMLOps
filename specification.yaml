@@ -12,11 +12,13 @@ data_preprocessing:
     regex: some_regex
     columns: [0, 1, 2] # column numbers
 feature_extraction:
+  # the columns must be mutually exclusive in these techniques
+  drop: [0, 1, 2]
   TF_IDF: [0, 1, 2] # column numbers
   one_hot_encoding: [0, 1, 2] # column numbers
   bag_of_words: [0, 1, 2] # column numbers
   n_grams: [0, 1, 2] # column numbers
-  Word_2_Vec: [0, 1, 2] # column numbers
+  word_2_vec: [0, 1, 2] # column numbers
 training:
   learning_rate: 0.1
   batch_size: 300
