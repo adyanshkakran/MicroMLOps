@@ -1,6 +1,7 @@
 import yaml
 from kafka import KafkaProducer
 import json
+import uuid
 
 producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=['localhost:9092'])
 
@@ -12,6 +13,7 @@ def checkSteps(steps, standard, step):
 def checkYaml():
     with open('config.yaml') as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
+        data["uuid"] = str(uuid.uuid4())
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
             if data['action'] == 'training':
