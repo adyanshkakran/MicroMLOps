@@ -15,13 +15,13 @@ def checkSteps(steps, standard, step):
 def checkYaml():
     with open('config.yaml') as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
-        data["uuid"] = str(uuid.uuid4())
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
             if data['action'] == 'training':
                 checkSteps(data.get('data_preprocessing'), standard['data_preprocessing'], 'data_preprocessing')
                 checkSteps(data.get('feature_extraction'), standard['feature_extraction'], 'feature_extraction')
                 checkSteps(data.get('training'), standard['training'], 'training')
+                data["uuid"] = str(uuid.uuid4())
                 if data.get('data_preprocessing') is not None:     
                     producer.send('data_preprocessing', data)
                     return
@@ -33,7 +33,7 @@ def checkYaml():
                     return
             elif data['action'] == 'inference':
                 for i in ['data_preprocessing', 'feature_extraction', 'training']:
-                    if data[i] is not None:
+                    if data[i] is None:
                         raise Exception('Invalid ' + i + ' step')
                 if data.get('data_preprocessing') is not None:     
                     producer.send('data_preprocessing', data)
