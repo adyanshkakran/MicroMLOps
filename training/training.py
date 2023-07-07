@@ -99,14 +99,15 @@ def process_message(message):
         raise Exception("Model or training config not specified")
     
     execute(data, model_config, message_obj, job_uuid)
-    
+    message_obj["data"] = message_obj["data"][:-7] + ".csv"
+
     return message_obj
 
 def execute(data: pd.DataFrame, model_config: str, config: dict, job_uuid: str):
     try:
         globals()[model_config](data, config, job_uuid)
         os.remove(config["data"])
-        os.remove(config["data"][:-5] + ".csv") # removed -d and -df files
+        os.remove(config["data"][:-5] + ".csv") # remove -d and -df files
     except Exception as e:
         print(e)
 
@@ -115,7 +116,7 @@ def send_message(output_message, producer: KafkaProducer):
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print("format output message for sending")
+        print(f"format output message for sending to {output_topic}")
     producer.send(output_topic, output_message)
 
     

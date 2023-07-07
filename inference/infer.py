@@ -13,7 +13,7 @@ def infer(data: pd.DataFrame, model_file_path: str):
 
     try:
         model = joblib.load(model_file_path)
-        results = model.predict(data[data.columns[0]])
+        results = model.predict(data[data.columns[:-1]])
 
         return pd.Series(results).to_json(orient="values")
     except FileNotFoundError as e:
