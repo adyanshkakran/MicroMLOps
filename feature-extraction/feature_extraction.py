@@ -24,12 +24,13 @@ default input topic is filename (without .py)
 output topic must be specified
 """
 input_topic:str = os.environ.get("INPUT_TOPIC", os.path.basename(__file__)[:-3])
-output_topic:str = os.environ.get("OUTPUT_TOPIC", "default_output_topic")
+output_topic_inference:str = os.environ.get("INFERENCE_OUTPUT_TOPIC", "default_output_topic")
+output_topic_training:str = os.environ.get("TRAINING_OUTPUT_TOPIC", "default_output_topic")
 kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
 consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
 
 if os.environ.get("MICROML_DEBUG", "0"):
-    print(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
+    print(f"Input Topic: {input_topic}; Output Topic(t/i): {output_topic_training}/{output_topic_inference}")
     print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
 def setup_kafka_consumer():
@@ -74,8 +75,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
     """
     try:
         for message in consumer:
-            output_message = process_message(message)
-            send_message(output_message, producer)
+            output_message, output_topic = process_message(message)
+            send_message(output_message, output_topic, producer)
     except KeyboardInterrupt:
         print("Exiting...")
 
@@ -88,16 +89,14 @@ def process_message(message):
     message_obj = json.loads(message.value)
     data = pd.read_csv(message_obj["data"])
     path = message_obj["data"]
-    global output_topic
-
-    output_topic = message_obj["action"] == "training" and os.environ.get("TRAINING_OUTPUT_TOPIC", "default_training_output_topic") or os.environ.get("INFERENCE_OUTPUT_TOPIC", "default_inference_output_topic")
-
-    if os.environ.get("MICROML_DEBUG", "0"):
-        print("output_topic: ", output_topic)
     
     execute(data, message_obj.get("feature_extraction"), path)
     message_obj["data"] = path[:-4] + "f.csv" # saves in file originalFileName-df.csv
-    return message_obj
+
+    if message_obj["action"] == "training":
+        return message_obj, output_topic_training
+    elif message_obj["action"] == "inference":
+        return message_obj, output_topic_inference
 
 def execute(data: pd.DataFrame, config: dict, path: str):
     print("\n\n\n")
@@ -128,7 +127,7 @@ def execute(data: pd.DataFrame, config: dict, path: str):
     if os.environ.get("MICROML_DEBUG", "0"):
         print(data.head())
 
-def send_message(output_message, producer: KafkaProducer):
+def send_message(output_message, output_topic, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
