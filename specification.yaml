@@ -3,25 +3,25 @@ data: ../archive/test.csv # This will be taken from data warehouse
 model: svm/random_forest/etc
 data_preprocessing:
   tokenization: [0, 1, 2] # column numbers
-  to_lowercase: [0, 1, 2] # column numbers
-  remove_nonalphanumerics: [0, 1, 2] # column numbers
-  remove_stopwords: [0, 1, 2] # column numbers
-  lemmatization: [0, 1, 2] # column numbers
-  stemming: [0, 1, 2] # column numbers
+  to_lowercase: [0, 1, 2]
+  remove_nonalphanumerics: [0, 1, 2]
+  remove_stopwords: [0, 1, 2]
+  lemmatization: [0, 1, 2]
+  stemming: [0, 1, 2]
   remove_specific:
     regex: some_regex
-    columns: [0, 1, 2] # column numbers
+    columns: [0, 1, 2]
 feature_extraction:
   # the columns must be mutually exclusive in these techniques
   drop: [0, 1, 2]
   TF_IDF: [0, 1, 2] # column numbers
-  one_hot_encoding: [0, 1, 2] # column numbers
-  bag_of_words: [0, 1, 2] # column numbers
-  n_grams: [0, 1, 2] # column numbers
-  word_2_vec: [0, 1, 2] # column numbers
+  one_hot_encoding: [0, 1, 2]
+  bag_of_words: [0, 1, 2]
+  n_grams: [0, 1, 2]
+  word_2_vec: [0, 1, 2]
 training:
-  features: [0, 1, 2] # column numbers
-  label: [3] # column numbers
+  features: ["feature-1", "feature-2"] # column names
+  labels: ["label-1", "label-2"] # column names
   learning_rate: 0.1
   batch_size: 300
   epochs: 5

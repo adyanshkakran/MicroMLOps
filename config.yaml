@@ -1,6 +1,6 @@
 action: training
 data: ../archive/sample.csv
-model: random_forest
+model: svm
 data_preprocessing:
   to_lowercase: [0]
   remove_nonalphanumerics: [0]
@@ -13,15 +13,15 @@ data_preprocessing:
   tokenization: [0]
 feature_extraction:
   # drop: [0]
-  TF_IDF: [0]
-  # one_hot_encoding: [0]
+  # TF_IDF: [0]
+  one_hot_encoding: [0]
   # bag_of_words: [0]
   # bag_of_n_grams: [(0, 1, 2)] # ToDo
-  # pca: [0]
+  # pca: [0] # ToDo
   # pca_n_components: 2
 training:
-  features: [0]
-  label: [1]
-  n_estimators: 100
+  features: ["text"]
+  labels: ["label"]
+  n_estimators: 120
   max_depth: None
   use_grid_search: true

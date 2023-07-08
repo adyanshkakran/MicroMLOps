@@ -8,16 +8,20 @@ from sklearn.metrics import accuracy_score
 import joblib
 
 def random_forest(data: pd.DataFrame, config: dict, job_uuid: str):
-    features = data[data.columns[:-1]]
-    x_train, x_test, y_train, y_test = train_test_split(features, data[data.columns[-1]])
+    training_config = config.get("training")
+    labels = data[training_config.get("labels")]
+    features = data[data.columns.difference(training_config.get("labels"))]
+    x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
     if os.environ.get("MICROML_DEBUG", "0"):
         print("shapes: x_train, x_test, y_train, y_test", x_train.shape, x_test.shape, y_train.shape, y_test.shape)
 
-    if config.get("n_estimators") is None:
-        config["n_estimators"] = 100
-    if config.get("max_depth") is None:
-        config["max_depth"] = None
-    model = RandomForestClassifier(n_estimators=config.get("n_estimators"), max_depth=config.get("max_depth"))
+    n_estimators = training_config.get("n_estimators")
+    max_depth = training_config.get("max_depth")
+    if n_estimators is None:
+        n_estimators = 100
+    if max_depth == 'None':
+        max_depth = None
+    model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
     start_time = time.time()
     model.fit(x_train, y_train)
     stop_time = time.time()
