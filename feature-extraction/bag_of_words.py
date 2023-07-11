@@ -11,7 +11,7 @@ def bag_of_words(data: pd.DataFrame, columns:list, new_columns: pd.DataFrame):
 
     try:
         for column in columns:
-            tf_column = vectorizer.fit_transform(new_columns.iloc[:, column])
+            tf_column = vectorizer.fit_transform(new_columns[column])
             tf_df = pd.DataFrame(tf_column.toarray(), columns=vectorizer.get_feature_names_out())
 
             data = pd.concat([tf_df, data], axis=1)

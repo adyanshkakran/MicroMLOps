@@ -106,8 +106,8 @@ def execute(data: pd.DataFrame, config: dict, path: str):
         if key == "drop":
             continue
         columns.update(config[key])
-    new_columns = pd.DataFrame(data.iloc[:, list(columns)])
-    data.drop(data.columns[list(columns)], axis=1, inplace=True)
+    new_columns = pd.DataFrame(data[list(columns)])
+    data.drop(list(columns), axis=1, inplace=True)
     for key in config.keys():
         for col in config[key]:
             # if key == "bag_of_n_grams":
@@ -117,7 +117,7 @@ def execute(data: pd.DataFrame, config: dict, path: str):
                 config[key].remove(col)
                 continue
             if key == "drop":
-                data.drop(data.columns[col], axis=1, inplace=True)
+                data.drop(col, axis=1, inplace=True)
                 print(f"Dropped {col}")
         done_columns.extend(config[key])
         if key != "drop":

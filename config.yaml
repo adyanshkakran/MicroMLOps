@@ -12,10 +12,10 @@ data_preprocessing:
   #   columns: [0] # column numbers
   tokenization: [0]
 feature_extraction:
-  # drop: [0]
-  # TF_IDF: [0]
-  one_hot_encoding: [0]
-  # bag_of_words: [0]
+  # drop: ["text"]
+  # TF_IDF: ["text"]
+  one_hot_encoding: ["text"]
+  # bag_of_words: ["text"]
   # bag_of_n_grams: [(0, 1, 2)] # ToDo
   # pca: [0] # ToDo
   # pca_n_components: 2
