@@ -9,7 +9,7 @@ sudo chown -R 1000:1000 kafka/data
 sudo chown -R 1000:1000 kafka/logs
 
 # Spin up docker compose
-sudo docker-compose up -d
+sudo docker-compose up --build -d
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Docker compose started${NC}"
 else
