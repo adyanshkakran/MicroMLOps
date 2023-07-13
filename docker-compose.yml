@@ -44,22 +44,70 @@ services:
     networks:
       - kafkanet
   
-  topic-watch:
-    build: ./topics-watch
+  topic-list:
+    build: ./topic-list
     depends_on:
-      - kafka1
       - zoo1
+      - kafka1
     networks:
       - kafkanet
 
   data-preprocessing:
     build: data-preprocessing
     depends_on:
-      - kafka1
       - zoo1
-      - topic-watch
+      - kafka1
+      - topic-list
     env_file:
       - ./data-preprocessing/.env
+    networks:
+      - kafkanet
+    restart: unless-stopped
+
+  feature-extraction:
+    build: feature-extraction
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./feature-extraction/.env
+    networks:
+      - kafkanet
+    restart: unless-stopped
+
+  training:
+    build: training
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./training/.env
+    networks:
+      - kafkanet
+    restart: unless-stopped
+
+  model-management:
+    build: model_management
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./model_management/.env
+    networks:
+      - kafkanet
+    restart: unless-stopped
+  
+  inference:
+    build: inference
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./inference/.env
     networks:
       - kafkanet
     restart: unless-stopped
