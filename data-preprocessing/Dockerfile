@@ -10,4 +10,4 @@ RUN python3 -m nltk.downloader stopwords
 
 COPY . .
 
-CMD [ "python3", "data-preprocessing.py" ]
+CMD [ "python3", "-u", "data-preprocessing.py" ]

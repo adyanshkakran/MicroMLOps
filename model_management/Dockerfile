@@ -8,4 +8,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "model_management.py" ]
+CMD [ "python3", "-u", "model_management.py" ]

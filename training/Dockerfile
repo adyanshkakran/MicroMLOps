@@ -8,4 +8,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "training.py" ]
+CMD [ "python3", "-u", "training.py" ]
