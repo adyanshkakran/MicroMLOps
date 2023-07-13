@@ -7,6 +7,7 @@ produces message on output topic
 
 import os
 import json
+import time
 import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
@@ -15,6 +16,10 @@ from pprint import pprint
 
 from svm import svm
 from random_forest import random_forest
+
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 

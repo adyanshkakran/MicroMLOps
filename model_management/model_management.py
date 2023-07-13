@@ -7,8 +7,13 @@ produces message on output topic
 
 import os
 import json
+import time
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
+
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 

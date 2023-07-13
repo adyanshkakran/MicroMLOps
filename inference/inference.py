@@ -7,12 +7,17 @@ produces message on output topic
 
 import json
 import os
+import time
 import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 
 from infer import infer
+
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 

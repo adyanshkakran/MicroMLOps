@@ -7,6 +7,7 @@ produces message on output topic
 
 import os
 import json
+import time
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 import pandas as pd
@@ -14,6 +15,10 @@ import pandas as pd
 from tf_idf import TF_IDF
 from one_hot_encoding import one_hot_encoding
 from bag_of_words import bag_of_words
+
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -31,7 +36,7 @@ consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
 
 if os.environ.get("MICROML_DEBUG", "0"):
     print(f"Input Topic: {input_topic}; Output Topic(t/i): {output_topic_training}/{output_topic_inference}")
-    print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
+    print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}", flush=True)
 
 def setup_kafka_consumer():
     """
