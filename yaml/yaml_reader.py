@@ -1,9 +1,18 @@
 import yaml
-from kafka import KafkaProducer
 import json
 import uuid
+import os
+import time
+from dotenv import load_dotenv
+from kafka import KafkaProducer
 
-producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=['localhost:9092'])
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
+
+load_dotenv(override=True) # env file has higher preference
+
+producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=[os.environ.get("KAFKA_BROKER", "localhost:9092")])
 
 def checkSteps(steps, standard, step):
     if steps is None:
@@ -44,5 +53,6 @@ def checkYaml():
             else:
                 raise Exception('Invalid action')
 checkYaml()
+print("done reading config")
 producer.flush()
     
