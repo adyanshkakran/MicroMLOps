@@ -9,6 +9,7 @@ produces message on output topic
 import os
 import json
 import re
+import time
 import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
@@ -23,6 +24,9 @@ from lemmatization import lemmatization
 from stemming import stemming
 from remove_specific import remove_specific
 
+print("going to sleep", flush=True)
+time.sleep(20)
+print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 

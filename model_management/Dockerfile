@@ -6,8 +6,6 @@ COPY requirements.txt requirements.txt
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN python3 -m nltk.downloader stopwords
-
 COPY . .
 
-CMD [ "python3", "data-preprocessing.py" ]
+CMD [ "python3", "model_management.py" ]
