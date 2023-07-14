@@ -67,6 +67,8 @@ services:
       - ./yaml/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
 
   data-preprocessing:
     build: data-preprocessing
@@ -78,6 +80,8 @@ services:
       - ./data-preprocessing/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
     restart: unless-stopped
 
   feature-extraction:
@@ -90,6 +94,8 @@ services:
       - ./feature-extraction/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
     restart: unless-stopped
 
   training:
@@ -102,6 +108,8 @@ services:
       - ./training/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
     restart: unless-stopped
 
   model-management:
@@ -114,6 +122,8 @@ services:
       - ./model_management/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
     restart: unless-stopped
   
   inference:
@@ -126,6 +136,8 @@ services:
       - ./inference/.env
     networks:
       - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
     restart: unless-stopped
 
 networks:

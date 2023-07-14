@@ -1,5 +1,5 @@
 action: training/inference
-data: ../archive/test.csv # This will be taken from data warehouse
+data: /archive/data/test.csv # This will be taken from data warehouse
 model: svm/random_forest/etc
 data_preprocessing:
   tokenization: ["column-1", "column-2"] # column names
