@@ -46,7 +46,8 @@ def setup_kafka_consumer():
     """
     config = {
         "group_id": consumer_group_id,
-        "bootstrap_servers": kafka_broker
+        "bootstrap_servers": kafka_broker,
+        "auto_offset_reset": "earliest"
     }
     try:
         consumer = KafkaConsumer(input_topic, **config)

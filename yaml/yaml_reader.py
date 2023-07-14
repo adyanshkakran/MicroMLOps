@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from kafka import KafkaProducer
 
 print("going to sleep", flush=True)
-time.sleep(20)
+time.sleep(25)
 print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference

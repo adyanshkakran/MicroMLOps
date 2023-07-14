@@ -53,7 +53,8 @@ def setup_kafka_consumer():
     """
     config = {
         "group_id": consumer_group_id,
-        "bootstrap_servers": kafka_broker
+        "bootstrap_servers": kafka_broker,
+        "auto_offset_reset": "earliest"
     }
     try:
         consumer = KafkaConsumer(input_topic, **config)
@@ -87,6 +88,7 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
     """
     try:
         for message in consumer:
+            print("received message")
             output_message = process_message(message)
             send_message(output_message, producer)
     except KeyboardInterrupt:
