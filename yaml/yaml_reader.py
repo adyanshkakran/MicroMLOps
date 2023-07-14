@@ -55,4 +55,3 @@ def checkYaml():
 checkYaml()
 print("done reading config")
 producer.flush()
-    

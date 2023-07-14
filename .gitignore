@@ -3,3 +3,5 @@ __pycache__/
 archive/info/
 archive/models/
 kafka/
+data-warehouse/models/
+data-warehouse/info/
