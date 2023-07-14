@@ -1,8 +1,11 @@
 import yaml
 from kafka import KafkaProducer
 import json
+import os
 import uuid
+from dotenv import load_dotenv
 
+load_dotenv(override=True)
 producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=['localhost:9092'])
 
 def checkSteps(steps, standard, step):
@@ -13,7 +16,7 @@ def checkSteps(steps, standard, step):
             raise Exception('Invalid ' + step + ' step ' + key)
 
 def checkYaml():
-    with open('config.yaml') as f:
+    with open('config-2.yaml') as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
@@ -32,17 +35,28 @@ def checkYaml():
                     producer.send('training', data)
                     return
             elif data['action'] == 'inference':
-                for i in ['data_preprocessing', 'feature_extraction', 'training']:
-                    if data[i] is None:
-                        raise Exception('Invalid ' + i + ' step')
+                for i in ['feature_extraction', 'training']:
+                    if data.get(i) is not None:
+                        raise Exception(f'Invalid {i} action')
+                job_uuid = data["model"]
+                with open(os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info") as f:
+                    info = json.load(f)
+                    if data.get('data_preprocessing') is None:
+                        data["data_preprocessing"] = info["data_preprocessing"]
+                    if data.get('feature_extraction') is None:
+                        data["feature_extraction"] = info["feature_extraction"]
+                    data["training"] = info["training"]
+                    # data["feature_extraction"]'
                 if data.get('data_preprocessing') is not None:     
                     producer.send('data_preprocessing', data)
                     return
                 if data.get('feature_extraction') is not None:
                     producer.send('feature_extraction', data)
                     return
+                producer.send('inference', data)
             else:
                 raise Exception('Invalid action')
+            
 checkYaml()
 producer.flush()
     

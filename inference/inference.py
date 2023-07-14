@@ -88,7 +88,7 @@ def process_message(message):
     # if os.environ.get("MICROML_DEBUG", "0"):
     #     print("parsed json obj: ", message_obj)
     
-    job_uuid = message_obj["uuid"]
+    job_uuid = message_obj["model"]
     data = pd.read_csv(message_obj["data"])
 
     try:
@@ -100,7 +100,10 @@ def process_message(message):
     except Exception as e:
         raise Exception("Could not find model or info") from e
 
-    results = infer(data, model_file_path)
+    results = infer(data, model_file_path, message_obj)
+
+    os.remove(message_obj["data"])
+    os.remove(message_obj["data"][:-5] + ".csv") # remove -d and -df files
 
     return results
 

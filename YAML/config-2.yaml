@@ -1,0 +1,3 @@
+action: inference
+data: ../archive/inference.csv
+model: f812097b-9afc-43b4-97d3-1e7bf300759e
