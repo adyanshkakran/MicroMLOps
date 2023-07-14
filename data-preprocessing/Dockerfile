@@ -8,6 +8,8 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 RUN python3 -m nltk.downloader stopwords
 
+RUN python3 -m nltk.downloader wordnet
+
 COPY . .
 
 CMD [ "python3", "-u", "data-preprocessing.py" ]
