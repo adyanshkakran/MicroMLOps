@@ -65,6 +65,7 @@ def setup_kafka_consumer():
     }
     try:
         consumer = KafkaConsumer(input_topic, **config)
+        logger.debug("Made KafkaConsumer")
         return consumer
     except Exception as e:
         logger.error("Could not create a Kafka Consumer")
@@ -112,24 +113,25 @@ def process_message(message):
     data = pd.read_csv(obj["data"])
     path = obj["data"]
 
-    execute(data, obj["data_preprocessing"], path)
+    execute(data, obj["data_preprocessing"], path, obj["uuid"])
     obj["data"] = path[:-4] + "-d.csv"
     return obj
 
-def execute(data: pd.DataFrame, config: dict, path: str):
+def execute(data: pd.DataFrame, config: dict, path: str, uuid: str = "-1"):
     for key in config.keys():
         if key == "remove_specific":
             try:
                 regex = re.compile(config[key]["regex"])
                 remove_specific(data, regex, config[key]["columns"])
             except Exception as e:
-                # TODO add warning with uuid
-                print(f"Invalid regex {config[key]['regex']}")
+                logger.error(f"Invalid regex {config[key]['regex']}", extra={"uuid": uuid})
+                # print(f"Invalid regex {config[key]['regex']}")
         else:
             try: 
                 globals()[key](data, config[key])
             except Exception as e:
-                print(f"Function {key} not found")
+                # print(f"Function {key} not found")
+                logger.error(f"Function {key} not found", extra={"uuid": uuid})
 
     data.to_csv(path[:-4] + "-d.csv", index=False) # saves in file originalFileName-d.csv
 
@@ -140,8 +142,8 @@ def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+    if debug_mode:
+        logger.debug(f"Sending {output_message}", extra={"uuid": output_message["uuid"]})
         
     producer.send(output_topic, output_message)
 
@@ -154,7 +156,7 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()

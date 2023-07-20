@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
-from pprint import pprint
 
 from kafka_logger import configure_logger
 
@@ -90,7 +89,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
             output_message = process_message(message)
             send_message(output_message, producer)
     except KeyboardInterrupt:
-        print("Exiting...")
+        # print("Exiting...")
+        logger.info("Received KeyboardInterrupt. Exiting.")
 
 def process_message(message):
     """
@@ -99,8 +99,6 @@ def process_message(message):
     Return output message
     """
     message_obj = json.loads(message.value)
-    if os.environ.get("MICROML_DEBUG", "0"):
-        pprint(message_obj)
     
     model_config = message_obj["model"]
     training_config = message_obj["training"]
@@ -121,14 +119,16 @@ def execute(data: pd.DataFrame, model_config: str, config: dict, job_uuid: str):
         os.remove(config["data"])
         os.remove(config["data"][:-5] + ".csv") # remove -d and -df files
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.error(str(e), extra={"uuid": job_uuid})
 
 def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format output message for sending to {output_topic}")
+        # print(f"format output message for sending to {output_topic}")
+        logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)
 
     
@@ -140,7 +140,8 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()

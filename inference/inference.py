@@ -57,6 +57,7 @@ def setup_kafka_consumer():
         consumer = KafkaConsumer(input_topic, **config)
         return consumer
     except Exception as e:
+        logger.critical("Failed to create Kafka Consumer")
         raise Exception("Failed to create Kafka Consumer")
 
 
@@ -73,6 +74,7 @@ def setup_kafka_producer():
         producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
+        logger.critical("Failed to create Kafka Producer")
         raise Exception("Failed to create Kafka Producer")
 
 
@@ -88,7 +90,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
             output_message = process_message(message)
             send_message(output_message, producer)
     except KeyboardInterrupt:
-        print("Exiting...")
+        # print("Exiting...")
+        logger.info("Received KeyboardInterrupt. Exiting.")
 
 def process_message(message):
     """
@@ -108,7 +111,8 @@ def process_message(message):
         info_file_path = os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info"
 
         if os.environ.get("MICROML_DEBUG", "0"):
-            print(model_file_path, info_file_path)
+            # print(model_file_path, info_file_path)
+            logger.debug(f"Model: {model_file_path} , info: {info_file_path}", extra={"uuid": job_uuid})
     except Exception as e:
         raise Exception("Could not find model or info") from e
 
@@ -121,7 +125,8 @@ def send_message(output_message, producer: KafkaProducer):
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+        # print(f"format {output_message} for sending")
+        logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)
 
     
@@ -133,7 +138,8 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()

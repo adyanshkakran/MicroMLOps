@@ -85,7 +85,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
             output_message, output_topic = process_message(message)
             send_message(output_message, output_topic, producer)
     except KeyboardInterrupt:
-        print("Exiting...")
+        # print("Exiting...")
+        logger.info("Received KeyboardInterrupt. Exiting.")
 
 def process_message(message):
     """
@@ -94,8 +95,6 @@ def process_message(message):
     Return output message
     """
     message_obj = json.loads(message.value)
-    if os.environ.get("MICROML_DEBUG", "0"):
-        print("parsed json obj: ", message_obj)
     
     if message_obj["action"] == "training":
         return message_obj, output_topic_training
@@ -107,7 +106,8 @@ def send_message(output_message, output_topic, producer: KafkaProducer):
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+        # print(f"format {output_message} for sending")
+        logger.debug(f"Sending {output_message}")
 
     producer.send(output_topic, output_message)
 
@@ -120,7 +120,8 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()

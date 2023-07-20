@@ -90,7 +90,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
             output_message, output_topic = process_message(message)
             send_message(output_message, output_topic, producer)
     except KeyboardInterrupt:
-        print("Exiting...")
+        # print("Exiting...")
+        logger.info("Received KeyboardInterrupt. Exiting.")
 
 def process_message(message):
     """
@@ -111,7 +112,7 @@ def process_message(message):
         return message_obj, output_topic_inference
 
 def execute(data: pd.DataFrame, config: dict, path: str):
-    print("\n\n\n")
+    # print("\n\n\n")
     done_columns = []
     columns = set()
     for key in config.keys():
@@ -125,12 +126,14 @@ def execute(data: pd.DataFrame, config: dict, path: str):
             # if key == "bag_of_n_grams":
             #     col = col[0]
             if col in done_columns:
-                print(f"Skipping {col} for {key} as it has already been processed.")
+                # print(f"Skipping {col} for {key} as it has already been processed.")
+                logger.info(f"Skipping {col} for {key} as it has already been processed.")
                 config[key].remove(col)
                 continue
             if key == "drop":
                 data.drop(col, axis=1, inplace=True)
-                print(f"Dropped {col}")
+                # print(f"Dropped {col}")
+                logger.info(f"Dropped {col}")
         done_columns.extend(config[key])
         if key != "drop":
             data = globals()[key](data, config[key], new_columns)
@@ -144,7 +147,8 @@ def send_message(output_message, output_topic, producer: KafkaProducer):
     Send output message to output_topic
     """
     if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+        # print(f"format {output_message} for sending")
+        logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)
 
     
@@ -156,7 +160,7 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()

@@ -58,5 +58,5 @@ def checkYaml():
             else:
                 raise Exception('Invalid action')
 checkYaml()
-print("done reading config")
+logger.info("done reading config")
 producer.flush()
