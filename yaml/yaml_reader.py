@@ -3,14 +3,19 @@ import json
 import uuid
 import os
 import time
+import logging
 from dotenv import load_dotenv
 from kafka import KafkaProducer
-
-print("going to sleep", flush=True)
-time.sleep(25)
-print("waking up", flush=True)
+from kafka_logger import configure_logger
 
 load_dotenv(override=True) # env file has higher preference
+logs_topic:str = os.environ.get("LOGS_TOPIC", "logs")
+kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
+debug_mode:bool = os.environ.get("MICROML_DEBUG", "0") == "1"
+
+time.sleep(25)
+logger = configure_logger("yaml_reader", logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
+logger.info("done waiting for kafka")
 
 producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf_8'),bootstrap_servers=[os.environ.get("KAFKA_BROKER", "localhost:9092")])
 

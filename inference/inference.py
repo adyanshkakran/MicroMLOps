@@ -8,16 +8,15 @@ produces message on output topic
 import json
 import os
 import time
+import logging
 import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 
-from infer import infer
+from kafka_logger import configure_logger
 
-print("going to sleep", flush=True)
-time.sleep(20)
-print("waking up", flush=True)
+from infer import infer
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -29,12 +28,19 @@ output topic must be specified
 """
 input_topic:str = os.environ.get("INPUT_TOPIC", os.path.basename(__file__)[:-3])
 output_topic:str = os.environ.get("OUTPUT_TOPIC", "default_output_topic")
+logs_topic:str = os.environ.get("LOGS_TOPIC", "logs")
 kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
 consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
+debug_mode:bool = os.environ.get("MICROML_DEBUG", "0") == "1"
+
+#  wait for kafka to start
+time.sleep(20)
+logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
+logger.info("done waiting for kafka")
 
 if os.environ.get("MICROML_DEBUG", "0"):
-    print(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
-    print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
+    logger.debug(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
+    logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
 def setup_kafka_consumer():
     """

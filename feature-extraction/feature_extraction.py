@@ -8,17 +8,17 @@ produces message on output topic
 import os
 import json
 import time
+import logging
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 import pandas as pd
+
+from kafka_logger import configure_logger
 
 from tf_idf import TF_IDF
 from one_hot_encoding import one_hot_encoding
 from bag_of_words import bag_of_words
 
-print("going to sleep", flush=True)
-time.sleep(20)
-print("waking up", flush=True)
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -31,12 +31,18 @@ output topic must be specified
 input_topic:str = os.environ.get("INPUT_TOPIC", os.path.basename(__file__)[:-3])
 output_topic_inference:str = os.environ.get("INFERENCE_OUTPUT_TOPIC", "default_output_topic")
 output_topic_training:str = os.environ.get("TRAINING_OUTPUT_TOPIC", "default_output_topic")
+logs_topic:str = os.environ.get("LOGS_TOPIC", "logs")
 kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
 consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
+debug_mode:bool = os.environ.get("MICROML_DEBUG", "0") == "1"
+
+time.sleep(20)
+logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
+logger.info("done waiting for kafka")
 
 if os.environ.get("MICROML_DEBUG", "0"):
-    print(f"Input Topic: {input_topic}; Output Topic(t/i): {output_topic_training}/{output_topic_inference}")
-    print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}", flush=True)
+    logger.debug(f"Input Topic: {input_topic}; Output Topic(T/I): {output_topic_training}/{output_topic_inference}")
+    logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
 def setup_kafka_consumer():
     """
