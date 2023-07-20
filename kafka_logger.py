@@ -20,7 +20,8 @@ class KafkaHandler(logging.Handler):
     def __init__(self, logs_topic, bootstrap_servers):
         super().__init__()
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
-                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+                                      value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                                      linger_ms=10)
         self.topic = logs_topic
 
     def emit(self, record):
