@@ -65,7 +65,6 @@ def setup_kafka_consumer():
     }
     try:
         consumer = KafkaConsumer(input_topic, **config)
-        logger.debug("Made KafkaConsumer")
         return consumer
     except Exception as e:
         logger.error("Could not create a Kafka Consumer")
@@ -122,13 +121,13 @@ def execute(data: pd.DataFrame, config: dict, path: str, uuid: str = "-1"):
         if key == "remove_specific":
             try:
                 regex = re.compile(config[key]["regex"])
-                remove_specific(data, regex, config[key]["columns"])
+                remove_specific(data, regex, config[key]["columns"], uuid)
             except Exception as e:
                 logger.error(f"Invalid regex {config[key]['regex']}", extra={"uuid": uuid})
                 # print(f"Invalid regex {config[key]['regex']}")
         else:
             try: 
-                globals()[key](data, config[key])
+                globals()[key](data, config[key], logger, uuid)
             except Exception as e:
                 # print(f"Function {key} not found")
                 logger.error(f"Function {key} not found", extra={"uuid": uuid})

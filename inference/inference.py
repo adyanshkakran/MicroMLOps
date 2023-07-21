@@ -114,9 +114,10 @@ def process_message(message):
             # print(model_file_path, info_file_path)
             logger.debug(f"Model: {model_file_path} , info: {info_file_path}", extra={"uuid": job_uuid})
     except Exception as e:
+        logger.error("Could not find model or info", {"uuid": job_uuid})
         raise Exception("Could not find model or info") from e
 
-    results = infer(data, model_file_path)
+    results = infer(data, model_file_path, logger, job_uuid)
 
     return results
 

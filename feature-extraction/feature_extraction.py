@@ -103,7 +103,7 @@ def process_message(message):
     data = pd.read_csv(message_obj["data"])
     path = message_obj["data"]
     
-    execute(data, message_obj.get("feature_extraction"), path)
+    execute(data, message_obj.get("feature_extraction"), path, message_obj["uuid"])
     message_obj["data"] = path[:-4] + "f.csv" # saves in file originalFileName-df.csv
 
     if message_obj["action"] == "training":
@@ -111,7 +111,7 @@ def process_message(message):
     elif message_obj["action"] == "inference":
         return message_obj, output_topic_inference
 
-def execute(data: pd.DataFrame, config: dict, path: str):
+def execute(data: pd.DataFrame, config: dict, path: str, uuid: str="0"):
     # print("\n\n\n")
     done_columns = []
     columns = set()
@@ -127,16 +127,16 @@ def execute(data: pd.DataFrame, config: dict, path: str):
             #     col = col[0]
             if col in done_columns:
                 # print(f"Skipping {col} for {key} as it has already been processed.")
-                logger.info(f"Skipping {col} for {key} as it has already been processed.")
+                logger.debug(f"Skipping {col} for {key} as it has already been processed.", extra={"uuid": uuid})
                 config[key].remove(col)
                 continue
             if key == "drop":
                 data.drop(col, axis=1, inplace=True)
                 # print(f"Dropped {col}")
-                logger.info(f"Dropped {col}")
+                logger.debug(f"Dropped {col}", extra={"uuid": uuid})
         done_columns.extend(config[key])
         if key != "drop":
-            data = globals()[key](data, config[key], new_columns)
+            data = globals()[key](data, config[key], new_columns, logger, uuid)
     data.to_csv(path[:-4]+ "f.csv", index=False)
     
     if os.environ.get("MICROML_DEBUG", "0"):

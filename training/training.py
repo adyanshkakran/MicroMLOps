@@ -115,7 +115,7 @@ def process_message(message):
 
 def execute(data: pd.DataFrame, model_config: str, config: dict, job_uuid: str):
     try:
-        globals()[model_config](data, config, job_uuid)
+        globals()[model_config](data, config, logger, job_uuid)
         os.remove(config["data"])
         os.remove(config["data"][:-5] + ".csv") # remove -d and -df files
     except Exception as e:
