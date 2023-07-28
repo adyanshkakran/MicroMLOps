@@ -14,6 +14,7 @@ import pandas as pd
 from tf_idf import TF_IDF
 from one_hot_encoding import one_hot_encoding
 from bag_of_words import bag_of_words
+import joblib
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -90,7 +91,11 @@ def process_message(message):
     data = pd.read_csv(message_obj["data"])
     path = message_obj["data"]
     
-    execute(data, message_obj.get("feature_extraction"), path)
+    if message_obj["action"] == "inference":
+        execute_inference(data, message_obj.get("feature_extraction"), path, message_obj["model"])
+    elif message_obj["action"] == "training":
+        execute_training(data, message_obj.get("feature_extraction"), path, message_obj["uuid"])
+
     message_obj["data"] = path[:-4] + "f.csv" # saves in file originalFileName-df.csv
 
     if message_obj["action"] == "training":
@@ -98,7 +103,7 @@ def process_message(message):
     elif message_obj["action"] == "inference":
         return message_obj, output_topic_inference
 
-def execute(data: pd.DataFrame, config: dict, path: str):
+def execute_training(data: pd.DataFrame, config: dict, path: str, uuid: str):
     print("\n\n\n")
     done_columns = []
     columns = set()
@@ -108,6 +113,7 @@ def execute(data: pd.DataFrame, config: dict, path: str):
         columns.update(config[key])
     new_columns = pd.DataFrame(data[list(columns)])
     data.drop(list(columns), axis=1, inplace=True)
+    encoders = {}
     for key in config.keys():
         for col in config[key]:
             # if key == "bag_of_n_grams":
@@ -121,9 +127,34 @@ def execute(data: pd.DataFrame, config: dict, path: str):
                 print(f"Dropped {col}")
         done_columns.extend(config[key])
         if key != "drop":
-            data = globals()[key](data, config[key], new_columns)
-    data.to_csv(path[:-4]+ "f.csv", index=False)
-    
+            data = globals()[key](data, config[key], new_columns, encoders)
+
+    try:
+        data.to_csv(path[:-4]+ "f.csv", index=False)
+    except Exception as e:
+        print("feature_extraction",e)
+
+    transformer_path = os.environ.get("ENCODER_WAREHOUSE", ".") + uuid + ".encoder"
+    joblib.dump(encoders, transformer_path)
+
+    if os.environ.get("MICROML_DEBUG", "0"):
+        print(data.head())
+        print("Transformer saved at: ", transformer_path)
+
+def execute_inference(data: pd.DataFrame, config: dict, path: str, uuid: str):
+    encoder = joblib.load(os.environ.get("ENCODER_WAREHOUSE", ".") + uuid + ".encoder")
+    # print(encoder)
+    for item in encoder.keys():
+        new_matrix = encoder[item].transform(data[item.split(":")[1]])
+        new_df = pd.DataFrame(new_matrix.toarray(), columns=encoder[item].get_feature_names_out())
+        data.drop(item.split(":")[1], axis=1, inplace=True)
+        data = pd.concat([new_df, data], axis=1)
+    try:
+        data.to_csv(path[:-4]+ "f.csv", index=False)
+    except Exception as e:
+        print("feature_extraction",e)
+        exit(0)
+
     if os.environ.get("MICROML_DEBUG", "0"):
         print(data.head())
 
