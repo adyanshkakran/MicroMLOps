@@ -38,7 +38,7 @@ time.sleep(20)
 logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
 logger.info("done waiting for kafka")
 
-if os.environ.get("MICROML_DEBUG", "0"):
+if debug_mode:
     logger.debug(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
     logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
@@ -100,8 +100,6 @@ def process_message(message):
     Return output message
     """
     message_obj = json.loads(message.value)
-    # if os.environ.get("MICROML_DEBUG", "0"):
-    #     print("parsed json obj: ", message_obj)
     
     job_uuid = message_obj["uuid"]
     data = pd.read_csv(message_obj["data"])
@@ -110,7 +108,7 @@ def process_message(message):
         model_file_path = os.environ.get("MODEL_WAREHOUSE") + job_uuid + ".model"
         info_file_path = os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info"
 
-        if os.environ.get("MICROML_DEBUG", "0"):
+        if debug_mode:
             # print(model_file_path, info_file_path)
             logger.debug(f"Model: {model_file_path} , info: {info_file_path}", extra={"uuid": job_uuid})
     except Exception as e:
@@ -125,7 +123,7 @@ def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         # print(f"format {output_message} for sending")
         logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)

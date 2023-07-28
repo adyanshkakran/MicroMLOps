@@ -48,7 +48,7 @@ time.sleep(20)
 logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
 logger.info("done waiting for kafka")
 
-if os.environ.get("MICROML_DEBUG", "0"):
+if debug_mode:
     logger.debug(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
     logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
@@ -134,7 +134,7 @@ def execute(data: pd.DataFrame, config: dict, path: str, uuid: str = "-1"):
 
     data.to_csv(path[:-4] + "-d.csv", index=False) # saves in file originalFileName-d.csv
 
-    if os.environ.get("MICROML_DEBUG"):
+    if debug_mode:
         print(data.head())
 
 def send_message(output_message, producer: KafkaProducer):

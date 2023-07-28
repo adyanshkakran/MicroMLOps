@@ -39,7 +39,7 @@ time.sleep(20)
 logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
 logger.info("done waiting for kafka")
 
-if os.environ.get("MICROML_DEBUG", "0"):
+if debug_mode:
     logger.debug(f"Input Topic: {input_topic}; Output Topic: {output_topic}")
     logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
@@ -74,6 +74,7 @@ def setup_kafka_producer():
         producer = KafkaProducer(value_serializer=lambda v: json.dumps(v).encode('utf-8'), **config)
         return producer
     except Exception as e:
+        logger.error("Failed to create Kafka Producer")
         raise Exception("Failed to create Kafka Producer")
 
 
@@ -106,6 +107,7 @@ def process_message(message):
     job_uuid = message_obj["uuid"]
 
     if not model_config or not training_config:
+        logger.error("Model or training config not specified", extra={"uuid": job_uuid})
         raise Exception("Model or training config not specified")
     
     execute(data, model_config, message_obj, job_uuid)
@@ -126,7 +128,7 @@ def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         # print(f"format output message for sending to {output_topic}")
         logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)

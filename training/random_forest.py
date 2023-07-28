@@ -8,11 +8,13 @@ from sklearn.metrics import accuracy_score
 import joblib
 
 def random_forest(data: pd.DataFrame, config: dict, logger, job_uuid: str):
+    debug_mode:bool = os.environ.get("MICROML_DEBUG", "0") == "1"
+    
     training_config = config.get("training")
     labels = data[training_config.get("labels")]
     features = data[data.columns.difference(training_config.get("labels"))]
     x_train, x_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         logger.debug(f"shapes: x_train:{x_train.shape}, x_test:{x_test.shape}, y_train:{y_train.shape}, y_test:{y_test.shape}", extra={"uuid": job_uuid})
 
     n_estimators = training_config.get("n_estimators")
@@ -26,13 +28,13 @@ def random_forest(data: pd.DataFrame, config: dict, logger, job_uuid: str):
     model.fit(x_train, y_train)
     stop_time = time.time()
 
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         logger.debug(f"Took {stop_time - start_time:.2f}s to train", extra={"uuid": job_uuid})
     
     # test and record accuracy
     predictions = model.predict(x_test)
     accuracy = accuracy_score(y_test, predictions)
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         logger.debug(f"Accuracy: {accuracy * 100:.2f}", extra={"uuid": job_uuid})
 
     # write model and config to files
@@ -45,5 +47,5 @@ def random_forest(data: pd.DataFrame, config: dict, logger, job_uuid: str):
     with open(info_name, "w+") as f:
         json.dump(config, f, ensure_ascii=False)
 
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         logger.debug("Saved model and info files", extra={"uuid": job_uuid})

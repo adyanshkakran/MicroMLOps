@@ -40,7 +40,7 @@ time.sleep(20)
 logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
 logger.info("done waiting for kafka")
 
-if os.environ.get("MICROML_DEBUG", "0"):
+if debug_mode:
     logger.debug(f"Input Topic: {input_topic}; Output Topic(T/I): {output_topic_training}/{output_topic_inference}")
     logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
@@ -139,14 +139,14 @@ def execute(data: pd.DataFrame, config: dict, path: str, uuid: str="0"):
             data = globals()[key](data, config[key], new_columns, logger, uuid)
     data.to_csv(path[:-4]+ "f.csv", index=False)
     
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         print(data.head())
 
 def send_message(output_message, output_topic, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    if os.environ.get("MICROML_DEBUG", "0"):
+    if debug_mode:
         # print(f"format {output_message} for sending")
         logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)
