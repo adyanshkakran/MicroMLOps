@@ -67,6 +67,8 @@ services:
       - ./yaml/.env
     networks:
       - kafkanet
+    ports:
+      - "8000:8000"
     volumes:
       - ./data-warehouse:/archive
       - ./kafka_logger.py:/app/kafka_logger.py
