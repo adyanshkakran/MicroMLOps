@@ -8,7 +8,7 @@ def TF_IDF(data: pd.DataFrame, columns:list, new_columns: pd.DataFrame):
     """
 
     vectorizer = TfidfVectorizer(analyzer='word', stop_words='english')
-
+    logger.info("Performing tfidf", extra={"uuid": uuid})
     try:
         for column in columns:
             tf_column = vectorizer.fit_transform(new_columns[column])
@@ -16,5 +16,6 @@ def TF_IDF(data: pd.DataFrame, columns:list, new_columns: pd.DataFrame):
 
             data = pd.concat([tf_df, data], axis=1)
     except Exception as e:
-        print("TF_IDF",e)
+        # print("TF_IDF",e)
+        logger.error(f"Error during tfidf: {str(e)}", extra={"uuid": uuid})
     return data

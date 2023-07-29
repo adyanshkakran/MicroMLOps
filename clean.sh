@@ -1,4 +1,5 @@
 #!/bin/bash
 
 sudo docker-compose down
-rm -rf kafka/
+sudo rm -rf kafka/
+exit
