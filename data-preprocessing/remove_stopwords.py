@@ -3,7 +3,7 @@ import pandas as pd
 from nltk.corpus import stopwords
 eng_stopwords = stopwords.words("english")
 
-def remove_stopwords(data: pd.DataFrame, columns: list):
+def remove_stopwords(data: pd.DataFrame, columns: list, logger, uuid:str="0"):
     """
     Removes words present in english stopwords list of nltk.corpus
     from each column in the columns list of the data df.
@@ -11,8 +11,10 @@ def remove_stopwords(data: pd.DataFrame, columns: list):
     Use remove_stopwords BEFORE tokenization
     """
     try:
+        logger.debug("Removing stopwords", extra={"uuid": uuid})
         for column in columns:
             data[data.columns[column]] = data[data.columns[column]].apply(lambda x: " ".join([word for word in x.split() if word not in eng_stopwords]))
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.error(str(e), extra={"uuid": uuid})
     

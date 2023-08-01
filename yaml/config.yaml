@@ -1,5 +1,5 @@
 action: training
-data: /archive/data/sample.csv
+data: ../archive/sample.csv
 model: random_forest
 data_preprocessing:
   to_lowercase: [0]

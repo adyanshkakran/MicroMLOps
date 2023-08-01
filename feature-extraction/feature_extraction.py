@@ -7,14 +7,19 @@ produces message on output topic
 
 import os
 import json
+import time
+import logging
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 import pandas as pd
+
+from kafka_logger import configure_logger
 
 from tf_idf import TF_IDF
 from one_hot_encoding import one_hot_encoding
 from bag_of_words import bag_of_words
 import joblib
+
 
 load_dotenv(override=True) # env file has higher preference
 
@@ -27,12 +32,18 @@ output topic must be specified
 input_topic:str = os.environ.get("INPUT_TOPIC", os.path.basename(__file__)[:-3])
 output_topic_inference:str = os.environ.get("INFERENCE_OUTPUT_TOPIC", "default_output_topic")
 output_topic_training:str = os.environ.get("TRAINING_OUTPUT_TOPIC", "default_output_topic")
+logs_topic:str = os.environ.get("LOGS_TOPIC", "logs")
 kafka_broker:str = os.environ.get("KAFKA_BROKER", "localhost:9092")
 consumer_group_id:str = os.environ.get("KCON_GROUP_ID", "default_group_id")
+debug_mode:bool = os.environ.get("MICROML_DEBUG", "0") == "1"
 
-if os.environ.get("MICROML_DEBUG", "0"):
-    print(f"Input Topic: {input_topic}; Output Topic(t/i): {output_topic_training}/{output_topic_inference}")
-    print(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
+time.sleep(20)
+logger = configure_logger(input_topic, logs_topic, [kafka_broker], level=logging.DEBUG if debug_mode else logging.INFO)
+logger.info("done waiting for kafka")
+
+if debug_mode:
+    logger.debug(f"Input Topic: {input_topic}; Output Topic(T/I): {output_topic_training}/{output_topic_inference}")
+    logger.debug(f"Group ID: {consumer_group_id}; Kafka Broker: {kafka_broker}")
 
 def setup_kafka_consumer():
     """
@@ -42,7 +53,8 @@ def setup_kafka_consumer():
     """
     config = {
         "group_id": consumer_group_id,
-        "bootstrap_servers": kafka_broker
+        "bootstrap_servers": kafka_broker,
+        "auto_offset_reset": "earliest"
     }
     try:
         consumer = KafkaConsumer(input_topic, **config)
@@ -79,7 +91,8 @@ def read_and_execute(consumer: KafkaConsumer, producer: KafkaProducer):
             output_message, output_topic = process_message(message)
             send_message(output_message, output_topic, producer)
     except KeyboardInterrupt:
-        print("Exiting...")
+        # print("Exiting...")
+        logger.info("Received KeyboardInterrupt. Exiting.")
 
 def process_message(message):
     """
@@ -103,8 +116,8 @@ def process_message(message):
     elif message_obj["action"] == "inference":
         return message_obj, output_topic_inference
 
-def execute_training(data: pd.DataFrame, config: dict, path: str, uuid: str):
-    print("\n\n\n")
+def execute_training(data: pd.DataFrame, config: dict, path: str, uuid: str="0"):
+    # print("\n\n\n")
     done_columns = []
     columns = set()
     for key in config.keys():
@@ -119,20 +132,19 @@ def execute_training(data: pd.DataFrame, config: dict, path: str, uuid: str):
             # if key == "bag_of_n_grams":
             #     col = col[0]
             if col in done_columns:
-                print(f"Skipping {col} for {key} as it has already been processed.")
+                # print(f"Skipping {col} for {key} as it has already been processed.")
+                logger.debug(f"Skipping {col} for {key} as it has already been processed.", extra={"uuid": uuid})
                 config[key].remove(col)
                 continue
             if key == "drop":
                 data.drop(col, axis=1, inplace=True)
-                print(f"Dropped {col}")
+                # print(f"Dropped {col}")
+                logger.debug(f"Dropped {col}", extra={"uuid": uuid})
         done_columns.extend(config[key])
         if key != "drop":
-            data = globals()[key](data, config[key], new_columns, encoders)
+            data = globals()[key](data, config[key], new_columns, encoders, logger, uuid)
 
-    try:
-        data.to_csv(path[:-4]+ "f.csv", index=False)
-    except Exception as e:
-        print("feature_extraction",e)
+    data.to_csv(path[:-4]+ "f.csv", index=False)
 
     transformer_path = os.environ.get("ENCODER_WAREHOUSE", ".") + uuid + ".encoder"
     joblib.dump(encoders, transformer_path)
@@ -162,8 +174,9 @@ def send_message(output_message, output_topic, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
-    if os.environ.get("MICROML_DEBUG", "0"):
-        print(f"format {output_message} for sending")
+    if debug_mode:
+        # print(f"format {output_message} for sending")
+        logger.debug(f"Sending {output_message}")
     producer.send(output_topic, output_message)
 
     
@@ -175,7 +188,7 @@ def main():
     try:
         read_and_execute(consumer, producer)
     except Exception as e:
-        print(e)
+        logger.error(str(e))
     finally:
         consumer.close()
         producer.flush()
