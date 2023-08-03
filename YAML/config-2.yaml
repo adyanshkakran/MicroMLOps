@@ -1,3 +1,3 @@
 action: inference
-data: ../archive/inference.csv
-model: cc9a40cb-1517-477a-b76a-1257ea67232c
+data: ../data-warehouse/data/inference.csv
+model: 072cfe5b-b82a-4174-a9fe-bd03a383bd44

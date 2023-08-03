@@ -16,7 +16,7 @@ def checkSteps(steps, standard, step):
             raise Exception('Invalid ' + step + ' step ' + key)
 
 def checkYaml():
-    with open('config.yaml') as f:
+    with open('config-2.yaml') as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
@@ -46,7 +46,7 @@ def checkYaml():
                     if data.get('feature_extraction') is None:
                         data["feature_extraction"] = info["feature_extraction"]
                     data["training"] = info["training"]
-                    # data["feature_extraction"]'
+                data["uuid"] = data["model"]
                 if data.get('data_preprocessing') is not None:     
                     producer.send('data_preprocessing', data)
                     return
