@@ -5,3 +5,4 @@ archive/models/
 kafka/
 data-warehouse/models/
 data-warehouse/info/
+data-warehouse/encoders/

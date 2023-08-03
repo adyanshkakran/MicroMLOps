@@ -56,9 +56,18 @@ async def upload_file(config_file: UploadFile = File(...)):
                 producer.send('training', data)
         elif data['action'] == 'inference':
             for i in ['data_preprocessing', 'feature_extraction', 'training']:
-                if data[i] is None:
+                if data.get(i) is not None:
                     logger.error(f"Invalid {i} step")
                     return {"message": "Error processing config", "error": f"Invalid {i} step"}
+            job_uuid = data["model"]
+            with open(os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info") as f:
+                info = json.load(f)
+                if data.get('data_preprocessing') is None:
+                    data["data_preprocessing"] = info["data_preprocessing"]
+                if data.get('feature_extraction') is None:
+                    data["feature_extraction"] = info["feature_extraction"]
+                data["training"] = info["training"]
+            data["uuid"] = data["model"]
             if data.get('data_preprocessing') is not None:     
                 producer.send('data_preprocessing', data)
             if data.get('feature_extraction') is not None:
