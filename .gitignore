@@ -2,6 +2,7 @@ venv/
 __pycache__/
 archive/info/
 archive/models/
+archive/encoders/
 kafka/
 data-warehouse/models/
 data-warehouse/info/

@@ -16,7 +16,7 @@ def checkSteps(steps, standard, step):
             raise Exception('Invalid ' + step + ' step ' + key)
 
 def checkYaml():
-    with open('config-2.yaml') as f:
+    with open('config.yaml') as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
         with open('specification.yaml') as st:
             standard = yaml.load(st, Loader=yaml.FullLoader)
