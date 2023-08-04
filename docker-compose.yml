@@ -72,6 +72,7 @@ services:
     volumes:
       - ./data-warehouse:/archive
       - ./kafka_logger.py:/app/kafka_logger.py
+    restart: unless-stopped
 
   data-preprocessing:
     build: data-preprocessing

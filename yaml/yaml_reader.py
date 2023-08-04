@@ -50,9 +50,9 @@ async def upload_file(config_file: UploadFile = File(...)):
             data["uuid"] = str(uuid.uuid4())
             if data.get('data_preprocessing') is not None:     
                 producer.send('data_preprocessing', data)
-            if data.get('feature_extraction') is not None:
+            elif data.get('feature_extraction') is not None:
                 producer.send('feature_extraction', data)
-            if data.get('training') is not None:
+            elif data.get('training') is not None:
                 producer.send('training', data)
         elif data['action'] == 'inference':
             for i in ['data_preprocessing', 'feature_extraction', 'training']:
@@ -70,7 +70,7 @@ async def upload_file(config_file: UploadFile = File(...)):
             data["uuid"] = data["model"]
             if data.get('data_preprocessing') is not None:     
                 producer.send('data_preprocessing', data)
-            if data.get('feature_extraction') is not None:
+            elif data.get('feature_extraction') is not None:
                 producer.send('feature_extraction', data)
         else:
             logger.error("Invalid step in config file")
