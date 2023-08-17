@@ -74,7 +74,7 @@ services:
       - ./kafka_logger.py:/app/kafka_logger.py
     restart: unless-stopped
 
-  data-preprocessing:
+  data-preprocessing-training:
     build: data-preprocessing
     depends_on:
       - zoo1
@@ -82,6 +82,9 @@ services:
       - topic-list
     env_file:
       - ./data-preprocessing/.env
+    environment:
+      - INPUT_TOPIC=training_data_preprocessing
+      - OUTPUT_TOPIC=training_feature_extraction
     networks:
       - kafkanet
     volumes:
@@ -89,7 +92,25 @@ services:
       - ./kafka_logger.py:/app/kafka_logger.py
     restart: unless-stopped
 
-  feature-extraction:
+  data-preprocessing-inference:
+    build: data-preprocessing
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./data-preprocessing/.env
+    environment:
+      - INPUT_TOPIC=inference_data_preprocessing
+      - OUTPUT_TOPIC=inference_feature_extraction
+    networks:
+      - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
+      - ./kafka_logger.py:/app/kafka_logger.py
+    restart: unless-stopped
+
+  feature-extraction-training:
     build: feature-extraction
     depends_on:
       - zoo1
@@ -97,6 +118,25 @@ services:
       - topic-list
     env_file:
       - ./feature-extraction/.env
+    environment:
+      - INPUT_TOPIC=training_feature_extraction
+    networks:
+      - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
+      - ./kafka_logger.py:/app/kafka_logger.py
+    restart: unless-stopped
+  
+  feature-extraction-inference:
+    build: feature-extraction
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./feature-extraction/.env
+    environment:
+      - INPUT_TOPIC=inference_feature_extraction
     networks:
       - kafkanet
     volumes:
@@ -119,7 +159,7 @@ services:
       - ./kafka_logger.py:/app/kafka_logger.py
     restart: unless-stopped
 
-  model-management:
+  model-management-training:
     build: model_management
     depends_on:
       - zoo1
@@ -127,6 +167,25 @@ services:
       - topic-list
     env_file:
       - ./model_management/.env
+    environment:
+      - INPUT_TOPIC=training_model_management
+    networks:
+      - kafkanet
+    volumes:
+      - ./data-warehouse:/archive
+      - ./kafka_logger.py:/app/kafka_logger.py
+    restart: unless-stopped
+  
+  model-management-inference:
+    build: model_management
+    depends_on:
+      - zoo1
+      - kafka1
+      - topic-list
+    env_file:
+      - ./model_management/.env
+    environment:
+      - INPUT_TOPIC=inference_model_management
     networks:
       - kafkanet
     volumes:
