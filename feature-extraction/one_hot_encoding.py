@@ -11,8 +11,9 @@ def one_hot_encoding(data: pd.DataFrame, columns:list, new_columns: pd.DataFrame
     logger.info("Performing one hot encoding", extra={"uuid": uuid})
     try:
         for column in columns:
-            encoder[column] = OneHotEncoder(sparse_output=False).fit(new_columns[column])
-            new_data = pd.DataFrame(encoder[column].transform(new_columns[column]))
+            col = new_columns[column].values.reshape(-1, 1)
+            encoder[column] = OneHotEncoder(sparse_output=False).fit(col)
+            new_data = pd.DataFrame(encoder[column].transform(col))
             new_data.columns = encoder[column].get_feature_names_out()
             data = pd.concat([new_data, data], axis=1)
             new_columns.drop(column, axis=1, inplace=True)
