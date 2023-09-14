@@ -18,7 +18,7 @@ def svm(data: pd.DataFrame, config: dict, logger, job_uuid: str):
         logger.debug(f"shapes: x_train:{x_train.shape}, x_test:{x_test.shape}, y_train:{y_train.shape}, y_test:{y_test.shape}", extra={"uuid": job_uuid})
 
     # Train svc and measure time to train
-    model = SVC()
+    model = SVC(probability=True)
     start_time = time.time()
     model.fit(x_train, y_train)
     stop_time = time.time()
@@ -27,7 +27,12 @@ def svm(data: pd.DataFrame, config: dict, logger, job_uuid: str):
         logger.debug(f"Took {stop_time - start_time:.2f}s to train", extra={"uuid": job_uuid})
     
     # test and record accuracy
-    predictions = model.predict(x_test)
+    prediction_proba = model.predict_proba(x_test)
+
+    predictions = []
+    for i in range(len(prediction_proba)):
+        predictions.append(prediction_proba[i].argmax())
+
     accuracy = accuracy_score(y_test, predictions)
     if debug_mode:
         logger.debug(f"Accuracy: {accuracy * 100:.2f}", extra={"uuid": job_uuid})

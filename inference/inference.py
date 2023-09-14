@@ -6,12 +6,14 @@ import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
+import pyRAPL
 
 from kafka_logger import configure_logger
 
 from infer import infer
 
 load_dotenv(override=True) # env file has higher preference
+pyRAPL.setup()
 
 """
 configuring kafka
@@ -107,13 +109,29 @@ def process_message(message):
     except Exception as e:
         logger.error("Could not find model or info", {"uuid": job_uuid})
         raise Exception("Could not find model or info") from e
+    
+    labels = None
+    if message_obj.get('labels') is not None:
+        labels = data[message_obj.get('labels')]
+        data = data.drop(columns=message_obj.get('labels'))
 
-    results = infer(data, model_file_path, logger, message_obj)
+    measure = pyRAPL.Measurement('cpu')
+
+    measure.begin()
+    results = infer(data, model_file_path, logger, message_obj,labels=labels)
+    measure.end()
+
+    results["power"] = {
+        "cpu": measure.result.pkg[0],
+        "dram": measure.result.dram[0],
+        "time": measure.result.duration,
+        "energy(µJ)": measure.result.pkg[0] * measure.result.duration
+    }
 
     os.remove(message_obj["data"])
     os.remove(message_obj["data"][:-5] + ".csv") # remove -d and -df files
 
-    return results
+    return json.dumps(results, ensure_ascii=False)
 
 def send_message(output_message, producer: KafkaProducer):
     """

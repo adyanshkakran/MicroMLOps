@@ -1,3 +1,4 @@
 action: inference
 data: ../archive/data/inference.csv
-model: 41e209aa-2480-4ff7-9a8d-da4cd266e4c8
+model: 7b639e0e-8ace-426d-83e4-eca6579aee26
+labels: sentiment

@@ -148,6 +148,7 @@ services:
       - ./data-warehouse:/archive
       - ./kafka_logger.py:/app/kafka_logger.py
     restart: unless-stopped
+    privileged: true
 
 networks:
   kafkanet:
