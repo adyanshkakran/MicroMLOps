@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
+import pyRAPL
+import csv
 
 from kafka_logger import configure_logger
 
@@ -20,6 +22,7 @@ from svm import svm
 from random_forest import random_forest
 
 load_dotenv(override=True) # env file has higher preference
+pyRAPL.setup()
 
 """
 configuring kafka
@@ -110,7 +113,21 @@ def process_message(message):
         logger.error("Model or training config not specified", extra={"uuid": job_uuid})
         raise Exception("Model or training config not specified")
     
+    measure = pyRAPL.Measurement('cpu')
+
+    measure.begin()
     execute(data, model_config, message_obj, job_uuid)
+    measure.end()
+
+    if debug_mode:
+        logger.debug(f"Energy consumed: {measure.result.pkg[0]} J", extra={"uuid": job_uuid})
+
+    message_obj["power"] = {
+        "cpu (µJ)": measure.result.pkg[0],
+        "dram": measure.result.dram[0],
+        "time": measure.result.duration
+    }
+
     message_obj["data"] = message_obj["data"][:-7] + ".csv"
 
     return message_obj
@@ -118,8 +135,10 @@ def process_message(message):
 def execute(data: pd.DataFrame, model_config: str, config: dict, job_uuid: str):
     try:
         globals()[model_config](data, config, logger, job_uuid)
+
         os.remove(config["data"])
         os.remove(config["data"][:-5] + ".csv") # remove -d and -df files
+
     except Exception as e:
         # print(e)
         logger.error(str(e), extra={"uuid": job_uuid})
@@ -128,6 +147,10 @@ def send_message(output_message, producer: KafkaProducer):
     """
     Send output message to output_topic
     """
+    with open('../archive/results/results.csv', 'a') as f:
+        writer = csv.writer(f)
+        output = [time.time(),'retraining', -1, output_message['accuracy'], output_message['power']['cpu (µJ)'], output_message['power']['dram'], output_message['power']['time']]
+        writer.writerow(output)
     if debug_mode:
         # print(f"format output message for sending to {output_topic}")
         logger.debug(f"Sending {output_message}")

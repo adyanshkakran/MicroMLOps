@@ -7,6 +7,7 @@ import pandas as pd
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 import pyRAPL
+import csv
 
 from kafka_logger import configure_logger
 
@@ -122,20 +123,24 @@ def process_message(message):
     measure.end()
 
     results["power"] = {
-        "cpu": measure.result.pkg[0],
+        "cpu (µJ)": measure.result.pkg[0],
         "dram": measure.result.dram[0],
-        "time": measure.result.duration,
-        "energy(µJ)": measure.result.pkg[0] * measure.result.duration
+        "time": measure.result.duration
     }
 
     os.remove(message_obj["data"])
     os.remove(message_obj["data"][:-5] + ".csv") # remove -d and -df files
 
+    with open('../archive/results/results.csv', 'a') as f:
+        writer = csv.writer(f)
+        output = [time.time(),'inference', results['confidence'], results['accuracy'], results['power']['cpu (µJ)'], results['power']['dram'], results['power']['time']]
+        writer.writerow(output)
+
     return json.dumps(results, ensure_ascii=False)
 
 def send_message(output_message, producer: KafkaProducer):
     """
-    Send output message to output_topic
+    Send output message to output_topic and save results
     """
     if debug_mode:
         # print(f"format {output_message} for sending")
