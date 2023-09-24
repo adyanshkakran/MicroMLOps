@@ -157,9 +157,10 @@ def execute_inference(data: pd.DataFrame, config: dict, path: str, uuid: str):
     encoder = joblib.load(os.environ.get("ENCODER_WAREHOUSE", ".") + uuid + ".encoder")
     # print(encoder)
     for item in encoder.keys():
-        new_matrix = encoder[item].transform(data[item.split(":")[1]])
-        new_df = pd.DataFrame(new_matrix.toarray(), columns=encoder[item].get_feature_names_out())
-        data.drop(item.split(":")[1], axis=1, inplace=True)
+        column = item.split(":")[1]
+        new_matrix = encoder[item].transform(pd.DataFrame(data[column], columns = [column]))
+        new_df = pd.DataFrame(new_matrix, columns=encoder[item].get_feature_names_out())
+        data.drop(column, axis=1, inplace=True)
         data = pd.concat([new_df, data], axis=1)
     try:
         data.to_csv(path[:-4]+ "f.csv", index=False)

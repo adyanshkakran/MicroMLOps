@@ -133,7 +133,7 @@ def process_message(message):
 
     with open('../archive/results/results.csv', 'a') as f:
         writer = csv.writer(f)
-        output = [time.time(),'inference', results['confidence'], results['accuracy'], results['power']['cpu (µJ)'], results['power']['dram'], results['power']['time']]
+        output = [time.time(),'inference', results['confidence'], results['accuracy'],results['f1_score'],results['precision'], results['recall'], results['power']['cpu (µJ)'], results['power']['dram'], results['power']['time']]
         writer.writerow(output)
 
     return json.dumps(results, ensure_ascii=False)

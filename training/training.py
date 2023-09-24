@@ -149,7 +149,7 @@ def send_message(output_message, producer: KafkaProducer):
     """
     with open('../archive/results/results.csv', 'a') as f:
         writer = csv.writer(f)
-        output = [time.time(),'retraining', -1, output_message['accuracy'], output_message['power']['cpu (µJ)'], output_message['power']['dram'], output_message['power']['time']]
+        output = [time.time(),'retraining', -1, output_message['accuracy'],output_message['f1_score'],output_message['precision'],output_message['recall'], output_message['power']['cpu (µJ)'], output_message['power']['dram'], output_message['power']['time']]
         writer.writerow(output)
     if debug_mode:
         # print(f"format output message for sending to {output_topic}")

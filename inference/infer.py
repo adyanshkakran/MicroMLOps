@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 from pprint import pprint
 import json
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 def infer(data: pd.DataFrame, model_file_path: str, logger, uuid: str="0", labels = None):
     """
@@ -24,6 +24,9 @@ def infer(data: pd.DataFrame, model_file_path: str, logger, uuid: str="0", label
 
         if labels is not None:
             results["accuracy"] = float(accuracy_score(labels, predictions))
+            results["f1_score"] = float(f1_score(labels, predictions))
+            results['precision'] = float(precision_score(labels,predictions))
+            results['recall'] = float(recall_score(labels,predictions))
 
         return results
     except FileNotFoundError as e:

@@ -4,7 +4,7 @@ import os
 import json
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import joblib
 
 def svm(data: pd.DataFrame, config: dict, logger, job_uuid: str):
@@ -34,13 +34,20 @@ def svm(data: pd.DataFrame, config: dict, logger, job_uuid: str):
         predictions.append(prediction_proba[i].argmax())
 
     accuracy = accuracy_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
     if debug_mode:
         logger.debug(f"Accuracy: {accuracy * 100:.2f}", extra={"uuid": job_uuid})
+        logger.debug(f"F1 Score: {f1 * 100:.2f}", extra={"uuid": job_uuid})
 
     # write model and config to files
     model_name = os.environ.get("MODEL_WAREHOUSE") + job_uuid + ".model"
     info_name = os.environ.get("INFO_WAREHOUSE") + job_uuid + ".info"
     config["accuracy"] = accuracy
+    config["f1_score"] = f1
+    config['precision'] = precision
+    config['recall'] = recall
 
     joblib.dump(model, model_name)
 

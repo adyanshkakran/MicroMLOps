@@ -1,4 +1,4 @@
 action: inference
 data: ../archive/data/test-new.csv
 labels: label
-model: 7b639e0e-8ace-426d-83e4-eca6579aee26
+model: c93a6727-8247-48ac-9172-add7c9d7fe9d

@@ -27,19 +27,21 @@ def retrain():
     with open('config-inference.yaml', 'w') as config:
         yaml.dump(config_data, config)
     
-    time.sleep(10)
+    time.sleep(300)
 
 def main():
     inference_data = pd.read_csv("../data-warehouse/data/test.csv")
-    train_data = pd.read_csv("../data-warehouse/data/sample.csv")
+    train_data = pd.read_csv("../data-warehouse/data/train-2.csv")
     train_data.to_csv("../data-warehouse/data/train-new.csv", index=False)
     del train_data
 
     new_train = open("../data-warehouse/data/train-new.csv", "a")
 
-    retrain_time = 5
+    retrain_time = 120
 
-    for i in range(9):
+    retrain()
+
+    for i in range(1000):
         str = inference_data.iloc[i][0].replace('"', '""')
         label = inference_data.iloc[i][1]
         
@@ -52,6 +54,8 @@ def main():
             
             r = requests.post(url, files=files)
             print('Inferencing', r.status_code)
+            if r.status_code == 500:
+                i -= 1
 
         time.sleep(1)
 
