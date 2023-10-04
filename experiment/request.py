@@ -27,7 +27,7 @@ def retrain():
     with open('config-inference.yaml', 'w') as config:
         yaml.dump(config_data, config)
     
-    time.sleep(300)
+    time.sleep(15 * 60) # wait while training
 
 def main():
     inference_data = pd.read_csv("../data-warehouse/data/test.csv")
@@ -37,11 +37,13 @@ def main():
 
     new_train = open("../data-warehouse/data/train-new.csv", "a")
 
-    retrain_time = 120
+    retrain_time = 10 * 60 # send a retrain job every 10 minutes
+    inference_time = 5 # send an inference every 5 seconds
 
     retrain()
 
-    for i in range(1000):
+    i = 0
+    while i < 2000:
         str = inference_data.iloc[i][0].replace('"', '""')
         label = inference_data.iloc[i][1]
         
@@ -57,13 +59,15 @@ def main():
             if r.status_code == 500:
                 i -= 1
 
-        time.sleep(1)
+        time.sleep(inference_time) 
 
         new_train.write(f'"{str}",{label}\n')
 
-        if (i+1) % retrain_time == 0:
+        if (i+1)*inference_time % retrain_time == 0:
             new_train.flush()
             retrain()
+
+        i += 1
 
     new_train.close()
     os.remove("../data-warehouse/data/test-new.csv")
